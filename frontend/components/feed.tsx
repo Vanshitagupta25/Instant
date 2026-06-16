@@ -1,5 +1,5 @@
 'use client'
-import { MessageCircle, Trash2, ChevronUp, ChevronDown, Search } from 'lucide-react';
+import { MessageCircle, Trash2, ChevronUp, ChevronDown } from 'lucide-react';
 import { useCallback, useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import type { Post, Comment, Channel, User } from '@/app/page';

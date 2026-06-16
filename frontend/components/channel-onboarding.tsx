@@ -1,8 +1,9 @@
 'use client';
 
-import { ArrowRight, Check } from 'lucide-react';
+import { ArrowRight, Check, Search } from 'lucide-react';
 import { motion } from 'framer-motion';
 import type { Channel } from '@/app/page';
+import { useState } from 'react';
 
 interface ChannelOnboardingProps {
   channels: Channel[];
@@ -17,19 +18,23 @@ export default function ChannelOnboarding({
   onJoinChannel,
   onComplete,
 }: ChannelOnboardingProps) {
-  const allJoined = channels.length > 0 && joinedChannelIds.length === channels.length;
 
-  const handleJoinAll = async () => {
-    const unjoinedChannels = channels.filter(
-      (channel) => !joinedChannelIds.includes(channel._id)
-    );
+  const [searchTerm, setSearchTerm] = useState('');
 
-    if (unjoinedChannels.length === 0) return;
+ const filteredChannels = channels.filter((channel) => {
+  const matched =
+    channel.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (channel.description ?? '')
+      .toLowerCase()
+      .includes(searchTerm.toLowerCase());
 
-    unjoinedChannels.forEach((channel) => {
-      onJoinChannel(channel._id);
-    });
-  };
+  console.log(channel.name, matched);
+
+  return matched;
+});
+  console.log("filtered channels", filteredChannels);
+  console.log("search term", searchTerm);
+  console.log("channels", channels);
 
   const VergeLogoSVG = () => (
     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="inline-block">
@@ -55,8 +60,31 @@ export default function ChannelOnboarding({
           <p className="text-gray-400 text-xs sm:text-sm md:text-base">Join channels to start sharing feedback with your team</p>
         </div>
 
+        {/*search bar */}
+        <div className="relative">
+          <Search
+            size={18}
+            className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+          />
+
+          <input
+            type="text"
+            placeholder="Search channels..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full pl-10 pr-4 py-1 bg-[#111827] border border-[#374151] rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-[#00A870] focus:ring-1 focus:ring-[#00A870]"
+          />
+        </div>
+
+
+        {/* Scrollable channel */}
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4 max-h-[50vh] sm:max-h-none overflow-y-scroll sm:overflow-visible [&::-webkit-scrollbar]:none [-ms-overflow-style:none] [scrollbar-width:none]">
-          {channels.map((channel, index) => {
+          {filteredChannels.length === 0 && (
+            <div className="text-center py-8 text-gray-400">
+              No channels found
+            </div>
+          )}
+          {filteredChannels.map((channel, index) => {
             const isJoined = joinedChannelIds.includes(channel._id);
 
             return (
@@ -113,19 +141,6 @@ export default function ChannelOnboarding({
           </button>
 
           <div className="flex flex-col sm:flex-row gap-2.5 sm:gap-3 w-full sm:w-auto order-1 sm:order-2">
-            <motion.button
-              whileHover={!allJoined ? { scale: 1.02 } : {}}
-              whileTap={!allJoined ? { scale: 0.98 } : {}}
-              onClick={handleJoinAll}
-              disabled={allJoined}
-              className={`h-10 sm:h-11 px-5 rounded-lg font-semibold transition-all text-xs sm:text-sm w-full sm:w-auto text-center ${allJoined
-                ? 'bg-[#374151] text-gray-500 cursor-not-allowed'
-                : 'bg-[#1f2937] hover:bg-[#374151] text-white border border-[#374151]'
-                }`}
-            >
-              {allJoined ? 'All Joined' : 'Join All Channels'}
-            </motion.button>
-
             <motion.button
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
