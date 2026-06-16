@@ -211,7 +211,7 @@ export default function AuthScreen({ onAuthenticate }: { onAuthenticate: (user: 
 
             <button
               type="submit"
-              disabled={isLoading || !email || !username || !password}
+              disabled={isLoading || !email || !password || (showSignUp || !username)}
               className="w-full flex items-center justify-center gap-2 px-4 py-2.5 mt-4 rounded-lg bg-gradient-to-r from-[#00A870] to-[#006239] hover:from-[#00A870]/90 hover:to-[#006239]/90 disabled:from-[#374151] disabled:to-[#374151] disabled:cursor-not-allowed text-white font-semibold transition-all shadow-lg"
             >
               <LogIn size={18} />
