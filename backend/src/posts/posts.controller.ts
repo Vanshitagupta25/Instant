@@ -1,8 +1,9 @@
-import { Body, Controller, Post, UseGuards, Req, UploadedFile, UseInterceptors, Get, Query, Param, Delete } from '@nestjs/common';
+import { Body, Controller, Post, UseGuards, Req, UploadedFile, UseInterceptors, Get, Query, Param, Delete, Patch } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { PostsService } from './posts.service';
 import { AuthGuard } from '../auth/auth.guard';
 import cloudinary from 'src/config/cloudinary.config';
+import { UpdatePostDto } from './dtos/post-dto';
 
 @Controller('posts')
 @UseGuards(AuthGuard)
@@ -51,8 +52,50 @@ export class PostsController {
     return this.postsService.getPostById(id);
   }
 
+  @Patch(':id')
+  @UseInterceptors(FileInterceptor('image'))
+  async updatePost(
+    @Param('id') id: string,
+    @Body() updatePostDto: UpdatePostDto,
+    @Body('removeImage') removeImage: string,
+    @UploadedFile() file: any,
+    @Req() req: any,
+  ) {
+    let imageUrl: string | null | undefined = updatePostDto.imageUrl;
+
+    if (removeImage === 'true') {
+      imageUrl = null;
+    }
+
+    if (file) {
+      const result = await new Promise((resolve, reject) => {
+        cloudinary.uploader.upload_stream(
+          { folder: 'posts' },
+          (error, result) => {
+            if (error) reject(error);
+            else resolve(result);
+          },
+        ).end(file.buffer);
+      });
+
+      imageUrl = (result as any).secure_url;
+    }
+
+    return this.postsService.updatePost(
+      id,
+      {
+        content: updatePostDto.content,
+        imageUrl,
+      },
+      req.user.sub,
+      req.user.role,
+    );
+  }
+
   @Delete(':id')
-  async deletePost(@Param('id') id: string, @Req() req: any) {
+  async deletePost(
+    @Param('id') id: string,
+    @Req() req: any) {
     return this.postsService.deletePost(id, req.user.sub, req.user.role);
   }
 }

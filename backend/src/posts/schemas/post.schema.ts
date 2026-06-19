@@ -11,8 +11,8 @@ export class Post {
   @Prop({ type: Types.ObjectId, ref: 'User', required: true })
   authorId: Types.ObjectId;
 
-  @Prop({ default: null })
-  imageUrl: string;
+  @Prop({ type: String, default: null })
+  imageUrl?: string | null;
 
   @Prop({ type: Number, default: 0 })
   commentsCount: number;

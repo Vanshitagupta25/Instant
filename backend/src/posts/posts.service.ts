@@ -3,6 +3,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 
 import { Post, PostDocument } from './schemas/post.schema';
+import { UpdatePostDto } from './dtos/post-dto';
 
 @Injectable()
 export class PostsService {
@@ -55,8 +56,6 @@ export class PostsService {
       .limit(limit + 1)
       .exec();
 
-    console.log('POST AUTHOR', JSON.stringify(posts[0]?.authorId, null, 2));
-
     const hasNextPage = posts.length > limit;
 
     if (hasNextPage) {
@@ -81,6 +80,36 @@ export class PostsService {
       throw new NotFoundException(`Post with ID ${postId} not found`);
     }
     return post;
+  }
+  async updatePost(
+    postId: string,
+    updateData: UpdatePostDto,
+    userId: string,
+    userRole: string,
+  ) {
+    const post = await this.postModel.findById(postId);
+
+    if (!post) {
+      throw new NotFoundException('Post not Exist');
+    }
+    const isAuthor = post.authorId.toString() === userId;
+    const isAdmin = userRole === 'admin';
+
+    if (!isAuthor && !isAdmin) {
+      throw new ForbiddenException('Access Denied')
+    }
+    if(updateData.content !== undefined) {
+      post.content = updateData.content;
+    }
+    if(updateData.imageUrl !== undefined) {
+      post.imageUrl = updateData.imageUrl;
+    }
+    await post.save();
+
+    return {
+      message: 'Post updated successfully',
+      post,
+    };
   }
 
   async deletePost(postId: string, userId: string, userRole: string) {

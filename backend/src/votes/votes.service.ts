@@ -21,6 +21,7 @@ export class VotesService {
       postId: pId,
       userId: uId,
     });
+    console.log('existingVote:', existingVote);
 
     if (!existingVote) {
       await this.voteModel.create({
@@ -28,6 +29,7 @@ export class VotesService {
         userId: uId,
         type: 'up',
       });
+      
 
       return this.postModel.findByIdAndUpdate(
         pId,
@@ -68,6 +70,7 @@ export class VotesService {
       postId: pId,
       userId: uId,
     });
+    console.log('existingVote:', existingVote);
     if (!existingVote) {
       await this.voteModel.create({
         postId: pId,
