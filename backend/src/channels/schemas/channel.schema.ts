@@ -13,6 +13,9 @@ export class Channel {
 
   @Prop({ default: true })
   isActive: boolean;
+
+  @Prop({ type: [String], default: []})
+  members: string[];
 }
 
 export const ChannelSchema = SchemaFactory.createForClass(Channel);

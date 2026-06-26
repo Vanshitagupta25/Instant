@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Param, UseGuards, HttpStatus, HttpCode, UsePipes, ValidationPipe } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, UseGuards, HttpStatus, HttpCode, UsePipes, ValidationPipe, Req } from '@nestjs/common';
 import { ChannelsService } from './channels.service';
 import { CreateChannelDto } from './dtos/create-channel.dto';
 import { AuthGuard } from '../auth/auth.guard';
@@ -17,13 +17,15 @@ export class ChannelsController {
 
   @Get()
   @HttpCode(HttpStatus.OK)
-  async getAllChannels() {
-    return this.channelsService.findAll();
+  async getAllChannels(@Req() req: any) {
+    const userId = req.user.id;
+    return this.channelsService.findAll(userId);
   }
 
   @Get(':id')
   @HttpCode(HttpStatus.OK)
-  async getChannelById(@Param('id') id: string) {
-    return this.channelsService.findOne(id);
+  async getChannelById(@Param('id') id: string, @Req() req: any) {
+    const userId = req.user.id;
+    return this.channelsService.findOne(id, userId);
   }
 }
